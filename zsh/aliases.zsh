@@ -1,3 +1,3 @@
 alias reload!='. ~/.zshrc'
 
-alias cls='clear' # Good 'ol Clear Screen command
+alias cic='set completion-ignore-case On'   # cic:          Make tab-completion case-insensitive

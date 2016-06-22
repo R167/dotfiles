@@ -1,4 +1,20 @@
 syntax on
+set number
+call pathogen#infect()
+call pathogen#helptags()
+highlight LineNr term=bold cterm=NONE ctermfg=DarkGrey ctermbg=White gui=NONE guifg=DarkGrey guibg=White
+"color jellybeans
+"let g:jellybeans_use_lowcolor_black = 0
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+nnoremap \nt :NERDTreeToggle<CR>
+set expandtab
+set shiftwidth=2
+set softtabstop=2
+set si
+autocmd FileType python setlocal expandtab shiftwidth=4 softtabstop=4
+autocmd FileType java setlocal expandtab shiftwidth=4 softtabstop=4
+autocmd FileType rust setlocal expandtab shiftwidth=4 softtabstop=4
+map <F7> mzgg=G`z<CR>
 
-" Wrap gitcommit file types at the appropriate length
 filetype indent plugin on

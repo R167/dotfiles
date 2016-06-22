@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+puts "Calculating saves space..."
+
+ordering = {'B'=>1, 'K'=>1e3, 'M'=>1e6, 'G'=>1e9}
+matcher = /(\d+(\.\d+)?)([#{ordering.keys*''}])\)/.freeze
+bytes = `brew cleanup -sn`.split("\n").map do |l|
+  v = l.match(matcher)
+  v.nil? ? 0 : v[1].to_f * ordering[v[3]]
+end.inject(:+).to_i
+
+puts "Will clean up approximately:"
+case bytes
+when (0...ordering['K'])
+  puts "#{bytes}B"
+when (ordering['K']...ordering['M'])
+  puts "%.2fK" % (bytes / 1.0e3)
+when (ordering['M']...ordering['G'])
+  puts "%.2fM" % (bytes / 1.0e6)
+else
+  puts "%.2fG" % (bytes / 1.0e9)
+end

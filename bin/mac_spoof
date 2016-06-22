@@ -1,0 +1,222 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+
+def hardware_mac(device="Wi-Fi")
+  out = `networksetup -getmacaddress "#{device}"`
+  out.match(/((\h{2}:?){6})/)[1]
+end
+
+def user
+  ENV["SUDO_USER"] || ENV["USER"]
+end
+
+def root
+  ENV["USER"] == "root"
+end
+
+module Tty extend self
+  def blue; bold 34; end
+  def white; bold 39; end
+  def red; underline 31; end
+  def reset; escape 0; end
+  def bold n; escape "1;#{n}" end
+  def underline n; escape "4;#{n}" end
+  def escape n; "\033[#{n}m" if STDOUT.tty? end
+end
+
+class Array
+  def shell_s
+    cp = dup
+    first = cp.shift
+    cp.map{ |arg| arg.gsub " ", "\\ " }.unshift(first) * " "
+  end
+end
+
+def ohai command
+  puts "#{Tty.blue}==>#{Tty.white} #{command}#{Tty.reset}"
+end
+
+def sudo(command)
+  unless root
+    ohai "/usr/bin/sudo #{command}"
+  end
+  `#{'/usr/bin/sudo ' unless root}#{command}`
+end
+
+options = {}
+option_parser = OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename(__FILE__)} [params]"
+
+  opts.separator("")
+  opts.separator("Optional")
+
+  options[:mac] = hardware_mac
+  options[:device] = 'en0'
+  options[:user] = user
+  options[:server] = nil
+  options[:ssh] = false
+  options[:reset] = false
+
+  opts.on("-p", "--preset=PRESET", "Preset") do |preset|
+    case preset
+    when 'reset'
+      options[:mac] = hardware_mac
+    when 'random'
+      options[:mac] = ("22%010x" % rand(0..(256**5))).scan(/../).join ':'
+    end
+  end
+
+  opts.on("-s", "--server=SSH_PRESET", "SSH Server name/ip") do |server|
+    options[:server] = server
+    options[:ssh] = true
+  end
+
+  opts.on("-m", "--mac=ADDRESS", "Mac Address") do |mac|
+    options[:mac] = mac
+  end
+
+  opts.on("-d", "--device=DEVICE", "Device") do |device|
+    options[:device] = device
+  end
+
+  opts.on("-u", "--user=USER", "User to SSH as for proxy") do |user|
+    options[:user] = user
+  end
+
+  opts.on("-r", "--reset", "Reset to hardware mac address on end") do |reset|
+    options[:reset] = reset
+  end
+end
+
+begin
+  option_parser.parse!
+  $options = options
+rescue OptionParser::ParseError => e
+  puts e.message.capitalize.error
+  exit
+end
+
+def shutdown
+  puts "\nCleaning up..."
+  if $ssh_pid
+    sudo 'networksetup -setsocksfirewallproxystate "Wi-Fi" off'
+    Process.kill(:TERM, $ssh_pid)
+  end
+  if $options[:reset]
+    sudo "ifconfig #{$options[:device]} ether #{hardware_mac}"
+    `networksetup -setairportpower en0 off`
+    `networksetup -setairportpower en0 on`
+  end
+  sleep 1
+end
+
+def long_loop(&block)
+  block ||= Proc.new {|_| nil}
+
+  start = Time.now.utc.to_f
+  puts
+  0.upto(Float::INFINITY) do |i|
+    s = Time.now.utc
+    t = s - start
+    block.call(i)
+    print "\x1b[1GElapsed %02dh %02dm %02ds" % [t.hour, t.min, t.sec]
+    interval = s - Time.now.utc + 1
+    if interval > 0
+      sleep interval
+    end
+  end
+end
+
+if options[:ssh] && options[:server].nil?
+  puts "#{Tty.red}ERROR#{Tty.reset}: YOU MUST HAVE A SERVER SPECIFIED FOR SSH!"
+end
+
+puts options
+puts "Assigning new mac addr"
+sudo "ifconfig #{options[:device]} ether #{options[:mac]}"
+puts "Turning off wifi..."
+`networksetup -setairportpower en0 off`
+puts "Turning wifi back on..."
+`networksetup -setairportpower en0 on`
+puts `ifconfig #{options[:device]}`
+
+pids = []
+$ssh_pid = nil
+
+trap("INT") do
+  shutdown
+  exit
+end
+
+trap("TERM") do
+  shutdown
+  exit
+end
+
+if options[:ssh]
+  x = false
+  puts
+  start = Time.now.utc
+  60.times do |i|
+    t = Time.now.utc - start
+    print "\x1b[1GChecking for internet... %02d seconds elapsed. Trial % 2d/60" % [t.round, i + 1]
+    if system('ping -c 1 -t 1 8.8.8.8 > /dev/null 2>&1')
+      puts "\x1b[1G\x1b[KGot connection. Verifying..."
+      sleep 1
+      if system('ping -c 1 -t 1 8.8.8.8 > /dev/null 2>&1')
+        x = true
+        break
+      end
+    end
+  end
+  puts "\x1b[1G\x1b[K"
+  if x
+    match = options[:server].match(/([^:]+)(:(\d+))?/)
+    server = match[1]
+    server = "-p #{match[3]} #{server}" if match[2]
+    pid = sudo "su #{options[:user]} -c 'ssh -nN -D 9999 #{server} > /dev/null 2>&1 & echo $!' && echo OKAY"
+    puts "BUG! NOT OKAY! PID: #{pid}" unless pid.include? 'OKAY'
+    $ssh_pid = pid.to_i
+    pids << pid
+    puts "SSH pid: #{$ssh_pid}"
+
+    puts
+    x = false
+    20.times do |i|
+      print "\x1b[1GVerifying SSH proxy... Trial %02d/20" % (i + 1)
+      if system('curl --socks5 localhost:9999 -I "http://google.com" > /dev/null 2>&1')
+        x = true
+        break
+      end
+      sleep 1
+    end
+    print "\x1b[1G\x1b[K"
+    unless x
+      puts "FAILED TO CONNECT. SHUTTING DOWN!"
+      shutdown
+      exit
+    end
+
+    puts "Old Config:\n#{`networksetup -getsocksfirewallproxy "Wi-Fi"`}"
+    sudo 'networksetup -setsocksfirewallproxy "Wi-Fi" 127.0.0.1 9999 off'
+    sudo 'networksetup -setsocksfirewallproxystate "Wi-Fi" on'
+
+    long_loop do |i|
+      if i % 10 == 0 && !system('curl --socks5 localhost:9999 -I "http://google.com" > /dev/null 2>&1')
+        puts "\x1b[1G\x1b[KERROR: could not connect to the internet. Shutting down.\a\a"
+        `say "internet connection terminated" > /dev/null 2>&1 &`
+        shutdown
+        exit
+      end
+    end
+  else
+    puts "Failure to connect. Please try again."
+    exit 1
+  end
+elsif options[:reset]
+  puts "Pausing Executions..."
+  long_loop
+end
+
+puts "Done."

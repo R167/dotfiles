@@ -1,0 +1,20 @@
+#!/bin/sh
+
+test_write () {
+  if [ -d $1 ]; then
+    if pv --help 2>&1 | grep '\-F' > /dev/null; then
+      echo "Writing ${2-256}MB file"
+      pv  -i 0.2 -s $((1024**2 * ${2-256})) -S -F "%b %t %a %p %e" < /dev/zero > $1/speed_test_tmpfile.tmp
+      echo "Reading ${2-256}MB file"
+      pv  -i 0.2 -s $((1024**2 * ${2-256})) -S -F "%b %t %a %p %e" <  $1/speed_test_tmpfile.tmp > /dev/null
+    else
+      echo "Writing ${2-256}MB file"
+      dd if=/dev/zero bs=1024 count=$((1024 * ${2-256})) | pv -B 1024 -i 0.2 -s $((1024**2 * ${2-256})) -btape > $1/speed_test_tmpfile.tmp
+      echo "Reading ${2-256}MB file"
+      pv -B 1024 -i 0.2 -s $((1024**2 * ${2-256})) -btape < $1/speed_test_tmpfile.tmp > /dev/null
+    fi
+    rm $1/speed_test_tmpfile.tmp
+  else
+    echo "'$1' is not a valid folder"
+  fi
+}

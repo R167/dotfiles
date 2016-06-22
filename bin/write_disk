@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if [ "$(id -u)" != "0" ]; then
+   echo "This script must be run as root" 1>&2
+   exit 1
+fi
+
+if [ -f $1 ]
+then
+  echo "Will use file $1"
+else
+  echo "This script must be given a file as first parameter!" 1>&2
+fi
+
+diskutil list
+
+printf "Type the desired disk NUMBER followed by [ENTER]: "
+
+read disknum
+echo "Unmounting Disk"
+diskutil unmountDisk /dev/disk$disknum
+echo "Writing Disk"
+dd if="$1" bs=4m 2>/dev/null | pv -i 1 -s `stat -f "%z" "$1"` -S -F "%b %t %a %p %e" | sudo dd of=/dev/rdisk$disknum bs=4m 2>/dev/null
+echo "Ejecting Disk"
+diskutil eject /dev/disk$disknum
+echo "Done."
+exit 0
