@@ -12,8 +12,10 @@ brew 'readline'
 brew 'ruby-build'
 brew 'rbenv'
 brew 'wget'
+brew 'thefuck'
 
 cask 'atom'
 cask 'google-chrome'
 cask 'transmission'
 cask 'slack'
+
