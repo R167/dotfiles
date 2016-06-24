@@ -7,27 +7,30 @@ unless defined? DOT_IRBRC_LOADED
 
   # Activate auto-completion.
   require 'irb/completion'
-  require 'irb/ext/save-history'
-
-  IRB.conf[:SAVE_HISTORY] = 10_000
-  IRB.conf[:HISTORY_FILE] = "#{ENV['HOME']}/.irb_history"
 
   # Use the simple prompt if possible.
   IRB.conf[:PROMPT_MODE] = :SIMPLE if IRB.conf[:PROMPT_MODE] == :DEFAULT
 
-  # begin
-  #   gem 'wirble'
-  #   require 'wirble'
-  #   Wirble.init
-  #   Wirble.colorize
-  # rescue LoadError
-  # end
-  #
-  # begin
-  #   require 'hirb'
-  #   Hirb::View.enable
-  # rescue LoadError
-  # end
-
+  HISTFILE = "~/.irb_history"
+  MAXHISTSIZE = 10_000
+  begin
+    histfile = File::expand_path(HISTFILE)
+    if File::exists?(histfile)
+      lines = IO::readlines(histfile).collect { |line| line.chomp }
+      puts "Read #{lines.size} saved history commands from '#{histfile}'." if $VERBOSE
+      Readline::HISTORY.push(*lines)
+    else
+      puts "History file '#{histfile}' was empty or non-existant." if $VERBOSE
+    end
+    Kernel::at_exit do
+      lines0 = File::exists?(histfile) ? IO::readlines(histfile).collect{ |line| line.chomp } : []
+      lines = (lines0 + Readline::HISTORY.to_a).reverse.uniq.reverse
+      lines = lines[-MAXHISTSIZE, MAXHISTSIZE] if lines.size > MAXHISTSIZE
+      puts "Saving #{lines.length} history lines to '#{histfile}'." if $VERBOSE
+      File::open(histfile, File::WRONLY|File::CREAT|File::TRUNC) { |io| io.puts lines.join("\n") }
+    end
+  rescue => e
+    puts "Error when configuring permanent history: #{e}" if $VERBOSE
+  end
   DOT_IRBRC_LOADED=true
 end
