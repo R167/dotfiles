@@ -15,7 +15,7 @@ unless defined? DOT_IRBRC_LOADED
   MAXHISTSIZE = 10_000
   begin
     histfile = File::expand_path(HISTFILE)
-    if File::exists?(histfile)
+    if File::exist?(histfile)
       lines = IO::readlines(histfile).collect { |line| line.chomp }
       puts "Read #{lines.size} saved history commands from '#{histfile}'." if $VERBOSE
       Readline::HISTORY.push(*lines)
@@ -23,7 +23,7 @@ unless defined? DOT_IRBRC_LOADED
       puts "History file '#{histfile}' was empty or non-existant." if $VERBOSE
     end
     Kernel::at_exit do
-      lines0 = File::exists?(histfile) ? IO::readlines(histfile).collect{ |line| line.chomp } : []
+      lines0 = File::exist?(histfile) ? IO::readlines(histfile).collect{ |line| line.chomp } : []
       lines = (lines0 + Readline::HISTORY.to_a).reverse.uniq.reverse
       lines = lines[-MAXHISTSIZE, MAXHISTSIZE] if lines.size > MAXHISTSIZE
       puts "Saving #{lines.length} history lines to '#{histfile}'." if $VERBOSE
