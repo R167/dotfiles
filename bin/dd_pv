@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if [ "$(id -u)" != "0" ]; then
+   echo "This script must be run as root" 1>&2
+   exit 1
+fi
+
+if [ $# -eq 2 ]
+then
+  echo "Good to go. Will write '$1' to '$2'"
+else
+  echo "Must provide 2 args!" 1>&2
+  exit 1
+fi
+
+echo "Writing..."
+dd if="$1" bs=4m 2>/dev/null | pv -i 1 -s `stat -f "%z" "$1"` -S -F "%b %t %a %p %e" | sudo dd of="$2" bs=4m 2>/dev/null
+echo "Done."
+exit 0
