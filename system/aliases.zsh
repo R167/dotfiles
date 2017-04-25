@@ -27,3 +27,5 @@ alias notrash="xattr -d -r com.apple.quarantine"
 
 alias rpi_ips="arp -a | grep b8:27:eb | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'"
 eval "$(thefuck --alias)"
+eval "$(thefuck --alias please)"
+eval "$(thefuck --alias shit!)"
