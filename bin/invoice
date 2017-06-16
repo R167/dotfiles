@@ -1,0 +1,76 @@
+#!/usr/bin/env RBENV_VERSION=2.4.0 ruby
+# frozen_string_literal: true
+
+require 'json'
+require 'cloudconvert-ruby'
+require 'open-uri'
+
+TIMETRAP = "RBENV_VERSION=2.4.0 timetrap"
+
+def timetrap(command)
+  `#{TIMETRAP} #{command}`
+end
+
+puts "Will use following entries:"
+lines = timetrap("display -f datesheet -r FORTExchange").split("\n")
+
+lines.each_with_index do |l, i|
+  puts "%2d | %s" % [i + 1, l[0, 120]]
+end
+
+dates = nil
+print "Would you like to customize date range? (y/N) "
+if gets.downcase.strip[0] == 'y'
+  print "Enter start number: "
+  start = gets.chomp.to_i
+  print "Enter end number (or blank for auto): "
+  stop = gets.chomp.to_i
+  ending = " --end #{lines[stop - 1].split.first}" if (1..lines.length).include?(stop)
+  dates = "--start #{lines[start - 1].split.first}#{ending}"
+end
+
+data = JSON.parse(timetrap("display -f docxtemp #{dates} -r FORTExchange"))
+
+def nested_data(prefix, data)
+  case data
+  when Array
+    data.flat_map.each_with_index do |val, i|
+      nested_data("#{prefix}[#{i}]", val)
+    end
+  when Hash
+    data.flat_map do |key, val|
+      nested_data("#{prefix}[#{key}]", val)
+    end
+  else
+    "#{prefix}=#{data}"
+  end
+end
+
+parts = [
+  "curl",
+  "-L 'https://api.cloudconvert.com/convert'",
+  "-F 'apikey=#{ENV['CLOUDCONVERT_API_KEY']}'",
+  "-F 'inputformat=docx'",
+  "-F 'outputformat=pdf'",
+  "-F 'input=upload'",
+  "-F file=@'/Users/wmd/Documents/invoice.docx'"
+]
+
+nested_data("converteroptions[templating]", data).each do |line|
+  parts << "-F '#{line}'"
+end
+
+parts << "-F 'converteroptions[optimize_print]=true'"
+parts << "-F 'wait=true'"
+parts << "-F 'download=true'"
+parts << "-F 'save=true'"
+
+filename = Time.now.strftime("/Users/wmd/tmp/invoices/invoice_%Y-%m-%d_%H%M.pdf")
+puts "Starting conversion"
+
+File.open(filename, 'wb') {|f| f.write(`#{parts.join(' ')}`)}
+
+puts "Saved to #{filename}"
+
+print "Open folder? (Y/n) "
+system("open -a Finder /Users/wmd/tmp/invoices/") unless gets.chomp.lstrip.downcase[0] == 'n'

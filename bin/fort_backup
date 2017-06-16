@@ -1,0 +1,30 @@
+#!/bin/bash
+
+report_status() {
+  if [[ $1 -eq 0 ]]; then
+    echo -e "[\033[32mSUCCESS\033[0m]"
+  else
+    echo -e "[\033[31mFAILURE\033[0m]"
+    exit
+  fi
+}
+
+status() {
+  echo -e "[\033[34mSTATUS\033[0m]  $@"
+}
+
+next_status() {
+  report_status
+  status "$@"
+}
+
+echo "Attempting to pull backup from staging..."
+status "Capturing backup"
+heroku pg:backups:capture --app fortexstage
+next_status "Downloading dump"
+heroku pg:backups:download --app fortexstage
+next_status "Running pg_restore"
+pg_restore --verbose --clean --no-acl --no-owner -h localhost -U postgres -d fx_development latest.dump
+next_status "Removing dump file"
+rm latest.dump
+next_status "Done!"
