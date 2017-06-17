@@ -2,8 +2,9 @@
 # frozen_string_literal: true
 
 require 'json'
-require 'cloudconvert-ruby'
 require 'open-uri'
+require 'rest-client'
+require 'ruby-progressbar'
 
 TIMETRAP = "RBENV_VERSION=2.4.0 timetrap"
 
@@ -29,48 +30,56 @@ if gets.downcase.strip[0] == 'y'
   dates = "--start #{lines[start - 1].split.first}#{ending}"
 end
 
-data = JSON.parse(timetrap("display -f docxtemp #{dates} -r FORTExchange"))
+data = {
+  apikey: ENV['CLOUDCONVERT_API_KEY'],
+  converteroptions: {templating: JSON.parse(timetrap("display -f docxtemp #{dates} -r FORTExchange"))},
+  download: false,
+  input: 'upload',
+  inputformat: 'docx',
+  outputformat: 'pdf',
+  save: true
+}
 
-def nested_data(prefix, data)
-  case data
-  when Array
-    data.flat_map.each_with_index do |val, i|
-      nested_data("#{prefix}[#{i}]", val)
+json_params = data.to_json
+
+class SpecialName < File
+  attr_writer :original_filename
+
+  def original_filename
+    if defined?(@original_filename)
+      @original_filename
+    else
+      self.class.basename(self.path)
     end
-  when Hash
-    data.flat_map do |key, val|
-      nested_data("#{prefix}[#{key}]", val)
-    end
-  else
-    "#{prefix}=#{data}"
   end
 end
 
-parts = [
-  "curl",
-  "-L 'https://api.cloudconvert.com/convert'",
-  "-F 'apikey=#{ENV['CLOUDCONVERT_API_KEY']}'",
-  "-F 'inputformat=docx'",
-  "-F 'outputformat=pdf'",
-  "-F 'input=upload'",
-  "-F file=@'/Users/wmd/Documents/invoice.docx'"
-]
+puts "Getting permission..."
+response = RestClient.post("https://api.cloudconvert.com/process", json_params, {content_type: :json, accept: :json})
+response_body = JSON.parse(response.body)
+process_url = "https:#{response_body['url']}"
 
-nested_data("converteroptions[templating]", data).each do |line|
-  parts << "-F '#{line}'"
+puts "Uploading file..."
+upload_file = SpecialName.new('/Users/wmd/Documents/invoice.docx')
+upload_file.original_filename = Time.now.strftime("invoice_%Y-%m-%d_%H%M.docx")
+status = JSON.parse(RestClient.post(process_url, {file: upload_file, json: json_params}, {accept: :json}).body)
+
+puts "Waiting for convertsion"
+progress = ProgressBar.create(title: status['message'], percent: status['percent'])
+loop do
+  status = JSON.parse(RestClient.get(process_url, {accept: :json}).body)
+  progress.title = status['message']
+  progress.progress = status['percent']
+  break if ['finished', 'error'].include? status['step']
+  sleep(1)
 end
 
-parts << "-F 'converteroptions[optimize_print]=true'"
-parts << "-F 'wait=true'"
-parts << "-F 'download=true'"
-parts << "-F 'save=true'"
-
 filename = Time.now.strftime("/Users/wmd/tmp/invoices/invoice_%Y-%m-%d_%H%M.pdf")
-puts "Starting conversion"
+puts "Downloading..."
 
-File.open(filename, 'wb') {|f| f.write(`#{parts.join(' ')}`)}
+IO.copy_stream(open("https:#{status['output']['url']}"), filename)
 
 puts "Saved to #{filename}"
 
 print "Open folder? (Y/n) "
-system("open -a Finder /Users/wmd/tmp/invoices/") unless gets.chomp.lstrip.downcase[0] == 'n'
+system("open -a Finder '/Users/wmd/tmp/invoices'") unless gets.chomp.lstrip.downcase[0] == 'n'
