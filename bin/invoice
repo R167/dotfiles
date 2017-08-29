@@ -64,7 +64,7 @@ upload_file = SpecialName.new('/Users/wmd/Documents/invoice.docx')
 upload_file.original_filename = Time.now.strftime("invoice_%Y-%m-%d_%H%M.docx")
 status = JSON.parse(RestClient.post(process_url, {file: upload_file, json: json_params}, {accept: :json}).body)
 
-puts "Waiting for convertsion"
+puts "Waiting for conversion"
 progress = ProgressBar.create(title: status['message'], percent: status['percent'])
 loop do
   status = JSON.parse(RestClient.get(process_url, {accept: :json}).body)
