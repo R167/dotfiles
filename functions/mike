@@ -1,6 +1,0 @@
-#!/bin/sh
-
-mike() {
-  osascript -e "set volume output volume 100"
-  say "Get out of here, Mike!"
-}
