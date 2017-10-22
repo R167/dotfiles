@@ -7,8 +7,8 @@ alias f='open -a Finder ./'                 # f:            Opens current direct
 alias ~="cd ~"                              # ~:            Go Home
 alias c='clear'                             # c:            Clear terminal display
 
-#HTOP=`which htop`
-#alias htop='sudo $HTOP'
+export HTOP=`which htop`
+alias htop='sudo $HTOP'
 
 alias path='echo -e ${PATH//:/\\n}'         # path:         Echo all executable Paths
 alias show_options='shopt'                  # show_options: display bash options settings
