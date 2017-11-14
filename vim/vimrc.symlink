@@ -25,6 +25,8 @@ NeoBundle 'tpope/vim-fugitive'
 NeoBundle 'vim-airline/vim-airline'
 NeoBundle 'morhetz/gruvbox'
 
+NeoBundle 'reedes/vim-pencil'
+
 NeoBundle 'Shougo/vimshell'
 
 " Required:

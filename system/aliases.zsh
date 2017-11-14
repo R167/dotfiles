@@ -27,6 +27,3 @@ alias notrash="xattr -d -r com.apple.quarantine"
 
 alias rpi_ips="arp -a | grep b8:27:eb | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'"
 alias brewup="brew update && brew upgrade"
-
-# export THEFUCK_HISTORY_LIMIT='2000'
-# eval "$(thefuck --alias)"

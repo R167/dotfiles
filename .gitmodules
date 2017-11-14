@@ -22,3 +22,6 @@
 [submodule "vim.symlink/bundle/ctrlp.vim"]
 	path = vim.symlink/bundle/ctrlp.vim
 	url = https://github.com/ctrlpvim/ctrlp.vim.git
+[submodule "vim.symlink/bundle/vim-pencil"]
+	path = vim.symlink/bundle/vim-pencil
+	url = https://github.com/reedes/vim-pencil.git

@@ -41,3 +41,7 @@ unset config_files
 source $BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+
+# Need to make sure it's loaded after PS1
+export THEFUCK_HISTORY_LIMIT='1000'
+eval $(thefuck --alias fuck)
