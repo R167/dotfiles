@@ -1,0 +1,24 @@
+[submodule "vim.symlink/bundle/lightline.vim"]
+	path = vim.symlink/bundle/lightline.vim
+	url = https://github.com/itchyny/lightline.vim
+[submodule "vim.symlink/bundle/neosnippet-snippets"]
+	path = vim.symlink/bundle/neosnippet-snippets
+	url = https://github.com/Shougo/neosnippet-snippets.git
+[submodule "vim.symlink/bundle/vim-airline"]
+	path = vim.symlink/bundle/vim-airline
+	url = https://github.com/vim-airline/vim-airline.git
+[submodule "vim.symlink/bundle/vim-fugitive"]
+	path = vim.symlink/bundle/vim-fugitive
+	url = https://github.com/tpope/vim-fugitive.git
+[submodule "vim.symlink/bundle/neosnippet.vim"]
+	path = vim.symlink/bundle/neosnippet.vim
+	url = https://github.com/Shougo/neosnippet.vim.git
+[submodule "vim.symlink/bundle/vimshell"]
+	path = vim.symlink/bundle/vimshell
+	url = https://github.com/Shougo/vimshell.git
+[submodule "vim.symlink/bundle/neobundle.vim"]
+	path = vim.symlink/bundle/neobundle.vim
+	url = https://github.com/Shougo/neobundle.vim
+[submodule "vim.symlink/bundle/ctrlp.vim"]
+	path = vim.symlink/bundle/ctrlp.vim
+	url = https://github.com/ctrlpvim/ctrlp.vim.git
