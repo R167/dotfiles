@@ -1,5 +1,42 @@
 # GRC colorizes nifty unix tools all over the place
-if (( $+commands[grc] )) && (( $+commands[brew] ))
+if [[ "$TERM" != dumb ]] && (( $+commands[grc] )) && (( $+commands[brew] ))
 then
-  source $BREW_PREFIX/etc/grc.zsh
+  # Prevent grc aliases from overriding zsh completions.
+  setopt COMPLETE_ALIASES
+
+  # Supported commands
+  cmds=(
+    cc \
+    configure \
+    # cvs \
+    df \
+    diff \
+    dig \
+    gcc \
+    # gmake \
+    ifconfig \
+    last \
+    # ldap \
+    # ls \
+    make \
+    mount \
+    mtr \
+    netstat \
+    ping \
+    ping6 \
+    ps \
+    traceroute \
+    traceroute6 \
+    # wdiff \
+  );
+
+  # Set alias for available commands.
+  for cmd in $cmds ; do
+    if (( $+commands[$cmd] )) ; then
+      alias $cmd="grc --colour=auto $cmd"
+    fi
+  done
+
+  # Clean up variables
+  unset cmds cmd
 fi

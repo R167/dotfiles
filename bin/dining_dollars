@@ -1,0 +1,71 @@
+#!/usr/bin/env ruby
+
+require 'date'
+
+today = Date.today
+
+# Assumes that all dates are inclusive (start date first day to eat/stop,
+# end date last day to eat/stop)
+dates = {
+  start: '2017-09-23',
+  end: '2018-06-14',
+
+  breaks: {
+    thanksgiving: {
+      start: '2017-11-23',
+      end: '2017-11-26'
+    },
+
+    winter: {
+      start: '2017-12-14',
+      end: '2018-01-06'
+    },
+
+    spring: {
+      start: '2018-03-24',
+      end: '2018-04-02'
+    },
+
+    weekend: {
+      start: '2018-04-27',
+      end: '2018-04-30'
+    }
+  }
+}
+
+dates[:start] = Date.parse(dates[:start])
+dates[:end] = Date.parse(dates[:end])
+
+dates[:duration] = dates[:end] - dates[:start] + 1
+
+dates[:breaks].each do |_key, br|
+  br[:start] = Date.parse(br[:start])
+  br[:end] = Date.parse(br[:end])
+  br[:duration] = br[:end] - br[:start] + 1
+
+  dates[:duration] -= br[:duration]
+end
+
+days = dates[:end] - today
+count = true
+
+if today <= dates[:start]
+  days = dates[:duration]
+  count = false if today < dates[:start]
+else
+  dates[:breaks].each do |_key, br|
+    if today <= br[:end]
+      days -= (br[:end] - today).clamp(0, br[:duration])
+      count = false if today.between?(br[:start], br[:end] - 1)
+    end
+  end
+end
+
+def money(days)
+  "$%.2f left per day" % (ARGV[0].to_f / days)
+end
+
+puts "#{days.to_i} days left in the year after today"
+puts money(days)
+puts "#{money(days + 1)} if counting today" if count
+
