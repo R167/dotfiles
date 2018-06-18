@@ -1,13 +1,10 @@
 cask_args appdir: '/Applications'
 
 tap 'homebrew/bundle'
-tap "homebrew/completions"
-tap "gemnasium/gemnasium"
 tap "thoughtbot/formulae"
 tap "caskroom/cask"
 tap "caskroom/versions"
 tap "homebrew/services"
-tap "homebrew/dupes"
 tap "homebrew/core"
 
 brew 'ack'
@@ -20,9 +17,7 @@ brew "bash"
 brew "bash-completion"
 brew 'binutils'
 brew "brew-cask-completion"
-brew "cmatrix"
 brew "coreutils", args: ["with-gmp"]
-brew "cowsay"
 brew "crystal-lang"
 brew "csvprintf"
 brew "curl"
@@ -34,14 +29,12 @@ brew "faac"
 brew "fdk-aac"
 brew "ffmpeg", args: ["with-fdk-aac", "with-fontconfig", "with-freetype", "with-libass", "with-libbluray", "with-libcaca", "with-libssh", "with-libvidstab", "with-libvorbis", "with-libvpx", "with-openssl", "with-opus", "with-sdl2", "with-snappy", "with-tesseract", "with-theora", "with-tools", "with-webp", "with-x265", "with-xz"]
 brew "findutils"
-brew "flac"
 brew "gcc"
 brew "git"
 brew "git-quick-stats"
 brew "gnu-sed"
 brew "gnu-tar"
 brew "gnu-typist"
-brew "go"
 brew 'gnutls'
 brew "gphoto2"
 brew "graphviz"
@@ -55,7 +48,6 @@ brew "jpeg-archive"
 brew "jpegoptim"
 brew "jq"
 brew "jsonpp"
-brew "keybase"
 brew "less"
 brew "librsvg"
 brew "libsass"
@@ -64,7 +56,6 @@ brew "mas"
 brew "media-info"
 brew "mercurial"
 brew "mkvtoolnix"
-brew "mobile-shell"
 brew "netcat"
 brew "nmap"
 brew "openjpeg"
@@ -97,8 +88,7 @@ brew 'zsh-history-substring-search'
 brew 'zsh-syntax-highlighting'
 
 cask 'atom'
-cask 'betterzipql'
-cask 'google-chrome'
+cask 'betterzip'
 cask 'qlimagesize'
 cask 'qlmarkdown'
 cask 'qlprettypatch'
@@ -108,10 +98,3 @@ cask 'quicklook-json'
 cask 'slack'
 cask 'transmission'
 cask 'webpquicklook'
-cask 'xquartz'
-
-mas "1Password", id: 443987910
-mas "DaisyDisk", id: 411643860
-mas "EasyRes", id: 688211836
-mas "Taurine", id: 960276676
-mas "The Unarchiver", id: 425424353

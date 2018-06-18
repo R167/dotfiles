@@ -1,6 +1,9 @@
 [submodule "vim.symlink/bundle/lightline.vim"]
 	path = vim.symlink/repos/github.com/itchyny/lightline.vim
 	url = https://github.com/itchyny/lightline.vim
+[submodule "vim.symlink/bundle/gruvbox"]
+  path = vim.symlink/repos/github.com/morhetz/gruvbox
+  url = https://github.com/morhetz/gruvbox.git
 [submodule "vim.symlink/bundle/neosnippet-snippets"]
 	path = vim.symlink/repos/github.com/Shougo/neosnippet-snippets
 	url = https://github.com/Shougo/neosnippet-snippets.git
@@ -22,6 +25,6 @@
 [submodule "vim.symlink/bundle/vim-pencil"]
 	path = vim.symlink/repos/github.com/reedes/vim-pencil
 	url = https://github.com/reedes/vim-pencil.git
-[submodule "vim.symlink/bundle/vim-pencil"]
+[submodule "vim.symlink/bundle/dein"]
 	path = vim.symlink/repos/github.com/Shougo/dein.vim
 	url = https://github.com/Shougo/dein.vim
