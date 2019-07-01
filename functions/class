@@ -1,0 +1,12 @@
+#!/bin/bash
+
+class() {
+  dir=$HOME/wrk/$1
+
+  if [ -d $dir ]; then
+    cd $dir
+  else
+    echo "'$1' is not a valid folder"
+  fi
+
+}

@@ -26,7 +26,7 @@ if dein#load_state('/Users/wmd/.vim')
   call dein#add('vim-airline/vim-airline')
   call dein#add('morhetz/gruvbox')
 
-  call dein#add('reedes/vim-pencil')
+"  call dein#add('reedes/vim-pencil')
 
   call dein#add('Shougo/vimshell')
 
