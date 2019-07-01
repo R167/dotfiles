@@ -12,7 +12,7 @@ fpath=($ZSH/functions $fpath)
 autoload -U $ZSH/functions/*(:t)
 
 HISTFILE=~/.zsh_history
-HISTSIZE=20000
+HISTSIZE=8192
 SAVEHIST=20000
 setopt appendhistory beep
 bindkey -e

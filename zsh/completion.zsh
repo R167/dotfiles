@@ -4,5 +4,3 @@ zstyle ':completion:*' matcher-list '' 'r:|[._-]=** r:|=**' 'm:{[:lower:]}={[:up
 zstyle ':completion:*' preserve-prefix '//[^/]##/'
 zstyle ':completion:*' squeeze-slashes true
 zstyle :compinstall filename '/Users/wmd/.zshrc'
-
-fpath=(/usr/local/share/zsh-completions $fpath)
