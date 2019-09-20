@@ -1,4 +1,4 @@
-#!/usr/bin/env RBENV_VERSION=2.4.0 ruby
+#!/usr/bin/env ruby
 # frozen_string_literal: true
 
 require 'json'
@@ -6,14 +6,16 @@ require 'open-uri'
 require 'rest-client'
 require 'ruby-progressbar'
 
-TIMETRAP = "RBENV_VERSION=2.4.0 timetrap"
+# TIMETRAP = "RBENV_VERSION=2.4.0 timetrap"
+TIMETRAP = 'timetrap'
+SHEET = 'current'
 
 def timetrap(command)
   `#{TIMETRAP} #{command}`
 end
 
 puts "Will use following entries:"
-lines = timetrap("display -f datesheet -r FORTExchange").split("\n")
+lines = timetrap("display -f datesheet -r #{SHEET}").split("\n")
 
 lines.each_with_index do |l, i|
   puts "%2d | %s" % [i + 1, l[0, 120]]
@@ -32,7 +34,7 @@ end
 
 data = {
   apikey: ENV['CLOUDCONVERT_API_KEY'],
-  converteroptions: {templating: JSON.parse(timetrap("display -f docxtemp #{dates} -r FORTExchange"))},
+  converteroptions: {templating: JSON.parse(timetrap("display -f docxtemp #{dates} -r #{SHEET}"))},
   download: false,
   input: 'upload',
   inputformat: 'docx',
